@@ -1,0 +1,1 @@
+#define MAX_EQUATION_LENGTH 1<<7

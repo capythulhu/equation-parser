@@ -6,5 +6,5 @@
 #include <stdio.h>
 
 int main(void) {
-    printf("%i", get_last_operation("2+5*8-3/4-9"));
+    solve("4*9/8-4+3*5");
 }

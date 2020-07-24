@@ -3,18 +3,54 @@
 #include <stdlib.h>
 #endif
 
+#ifndef STRING_H
+#define STRING_H
+#include <string.h>
+#endif
+
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+#include "constants.h"
+#endif
+
+#ifndef STDBOOL_H
+#define STDBOOL_H
+#include <stdbool.h>
+#endif
+
 // Node for each equation bit
 typedef struct _node {
-    char            equation[1<<7];
+    char            equation[MAX_EQUATION_LENGTH];
     struct _node    *left;
     struct _node    *right;
 } node;
 
-// Creates a new node
-node *new_node(char equation[]) {
+// Create a new node
+node *new_node(const char equation[]) {
     node *output = malloc(sizeof(node));
-    output->equation = equation;
+    strcpy(output->equation, equation);
     output->left = NULL;
     output->right = NULL;
     return output;
+}
+
+// Try to add a child to a tree node
+bool add_child(node *parent, node *child) {
+    if(!parent->left) {
+        parent->left = child;
+        return true;
+    }
+    if(!parent->right) {
+        parent->right = child;
+        return true;
+    }
+    return false;
+}
+
+// Iterate along the tree
+void for_each_node(node *root, void (*function)(node*)) {
+    // Execute the function
+    function(root);
+    if(root->left) for_each_node(root->left, function);
+    if(root->right) for_each_node(root->right, function);
 }
