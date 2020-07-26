@@ -47,10 +47,27 @@ bool add_child(node *parent, node *child) {
     return false;
 }
 
-// Iterate along the tree
-void for_each_node(node *root, void (*function)(node*)) {
-    // Execute the function
-    function(root);
-    if(root->left) for_each_node(root->left, function);
-    if(root->right) for_each_node(root->right, function);
+// Try to clear the children from a tree node
+bool clear_children(node *parent) {
+    if(!parent->left) {
+        free(parent->left);
+        parent->left = NULL;
+        return true;
+    }
+    if(!parent->right) {
+        free(parent->right);
+        parent->right = NULL;
+        return true;
+    }
+    return false;
+}
+
+// Iterate along the tree, from the root or from the leaves
+void for_each_node(node *root, void (*function)(node*), bool topToBottom) {
+    // Execute the function from the top
+    if(topToBottom) function(root);
+    if(root->left) for_each_node(root->left, function, topToBottom);
+    if(root->right) for_each_node(root->right, function, topToBottom);
+    // Execute the function from the bottom
+    if(!topToBottom) function(root);
 }

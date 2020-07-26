@@ -8,6 +8,11 @@
 #include <stdio.h>
 #endif
 
+#ifndef STBOOL_H
+#define STBOOL_H
+#include <stdbool.h>
+#endif
+
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 #include "constants.h"
@@ -37,10 +42,10 @@ int get_last_operation(char equation[]) {
     for(i = 0; i < size; i++) positions[i] = -1;
     
     // Loop backwards through the equation
-    // (we want to get the least precedent,
-    // so that makes sense).
+    // (we want to get the least precedent
+    // operation).
     for(i = strlen(equation) - 1; i >= 0; i--) {
-        // If the char is a whitespace...
+        // If the char is a whitespace, an EOL...
         if(equation[i] == ' '
             || equation[i] == '\0') continue;
         // ...or a number, jump to next iteration
@@ -48,11 +53,11 @@ int get_last_operation(char equation[]) {
             && equation[i] <= '9') continue;
         // If it's possibly an operator, iterate through all
         // of them, checking which precedence level it has
-        int j, k, l = 0;
+        int j, k, l = false;
         for(j = 0; j < size && !l; j++) {
             // If that operator has been seen previously,
             // jump to the next iteration
-            if(positions[j] != -1) continue;
+            if(positions[j] >= 0) continue;
             // Loop through all the operators in that
             // precedence level
             for(k = 0; k < sizeof operators[0]; k++) {
@@ -67,7 +72,7 @@ int get_last_operation(char equation[]) {
                         positions[j] = i;
                         // And tell the outer loop that the job
                         // is done
-                        l = 1;
+                        l = true;
                         break;
                     }
                 }
@@ -78,7 +83,7 @@ int get_last_operation(char equation[]) {
     // that contains the least precedent
     // operation sign, and return it
     for(i = size - 1; i >= 0; i--)
-        if(positions[i] != -1) return positions[i];
+        if(positions[i] >= 0) return positions[i];
 
     // If it has none, then it isn't an
     // equation, so return -1
@@ -86,7 +91,7 @@ int get_last_operation(char equation[]) {
 }
 
 // Split a node if it has unsolved math
-void solve_node(node *n) {
+void split_node(node *n) {
     // Check if there is still unsolved math
     int operation = get_last_operation(n->equation);
     // If there is...
@@ -103,12 +108,13 @@ void solve_node(node *n) {
         }
         // After it's done, finalize the string...
         leftEquation[i] = '\0';
-        // ...and skip the separator
+        // ...and skip the separator index
         i++;
         // Now do the same for the right node
         char rightEquation[MAX_EQUATION_LENGTH];
+        int j = i;
         do {
-            rightEquation[i] = n->equation[i];
+            rightEquation[i - j] = n->equation[i];
         } while(n->equation[i++] != '\0');
         // Create the children and assign the math
         node *left = new_node(leftEquation);
@@ -123,12 +129,52 @@ void solve_node(node *n) {
     }
 }
 
-void print_node(node *n) {
-    printf("%s\n", n->equation);
+// Solve the math contained on a node
+void solve_node(node *n) {
+    // If the node has both children, solve it
+    if(n->left && n->right) {
+        // Switches on the operation and properly
+        // calculate the operation
+        switch(n->equation[0]) {
+            // Detects addition
+            case '+':
+                sprintf(n->equation, "%i",
+                atoi(n->left->equation) 
+                    + atoi(n->right->equation));
+                    
+            break;
+            // Detects subtraction
+            case '-':
+                sprintf(n->equation, "%i",
+                atoi(n->left->equation) 
+                    - atoi(n->right->equation));
+            break;
+            // Detects multiplication
+            case '*':
+                sprintf(n->equation, "%i",
+                atoi(n->left->equation) 
+                    * atoi(n->right->equation));
+            break;
+            // Detects division
+            case '/':
+                sprintf(n->equation, "%i",
+                atoi(n->left->equation) 
+                    / atoi(n->right->equation));
+            break;
+        }
+        // Clear the children of the current node
+        clear_children(n);
+    }
 }
 
+// Solve the equation
 int solve(const char equation[]) {
+    // Create the tree
     node *root = new_node(equation);
-    for_each_node(root, solve_node);
-    for_each_node(root, print_node);
+    // Split the equation from the root
+    for_each_node(root, split_node, true);
+    // Start solving it from the leaves
+    for_each_node(root, solve_node, false);
+    // And print the result
+    printf("%s", root->equation);
 }
