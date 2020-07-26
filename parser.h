@@ -26,14 +26,48 @@
 // Operators ordered by their precedence level
 char operators[][2] = {{'*', '/'}, {'+', '-'}};
 
+// Check if the base precedence level of the
+// equation is one (if it begins and ends with)
+// parentheses
+bool normalize_precedence_offset(char equation[]) {
+    // Get the size of the equation
+    const unsigned int size = strlen(equation);
+    int i = 0;
+    // And jump the whitespaces
+    while(equation[i] != ' ') i++;
+    // If it finds a parentheses before
+    // any other character...
+    if(equation[i] == '(') {
+        // ...store the index and begin to
+        // iterate over the equation again,
+        // this time backwards
+        int j = i;
+        i = size - 1;
+        // Jumps the whitespaces
+        while(equation[i] != ' ') i--;
+        // And if it finds a closing parentheses
+        // as the last character...
+        if(equation[i] == ')') {
+            // Remove both parentheses and return
+            equation[j] = ' ';
+            equation[i] = ' ';
+            return true;
+        }
+    }
+    // Or return false if the base offset
+    // of this equation isn't greater
+    // than zero
+    return false;
+}
+
 // Get least precedent operation. This function
 // is necessary to split the main equation into
 // smaller bits so we can dispose these parts
 // along the tree data structure and calculate
 // most precedent parts first.
-int get_last_operation(char equation[]) {
+int get_last_operation(const char equation[]) {
     // How much precedence levels there are...
-    const int size = sizeof operators / sizeof operators[0];
+    const unsigned int size = sizeof operators / sizeof operators[0];
     // ...and the array to keep track of the char positions
     int positions[size];
     
@@ -41,16 +75,35 @@ int get_last_operation(char equation[]) {
     int i;
     for(i = 0; i < size; i++) positions[i] = -1;
     
+    // Initialize the precedence offset
+    // (used for precedencies forced by
+    // parenthesis)
+    int p = 0;
+
     // Loop backwards through the equation
     // (we want to get the least precedent
     // operation).
     for(i = strlen(equation) - 1; i >= 0; i--) {
-        // If the char is a whitespace, an EOL...
-        if(equation[i] == ' '
-            || equation[i] == '\0') continue;
+        // If it's a parentheses, increase 
+        // or decrease the precedence offset
+        if(equation[i] == ')') {
+            p--;
+            continue;
+        }
+        if(equation[i] == '(') {
+            p++;
+            continue;
+        }
+        // If there is any precedence offset...
+        if(p > 0) continue;
+        // ...or if the char is a whitespace...
+        if(equation[i] == ' ') continue;
         // ...or a number, jump to next iteration
         if(equation[i] >= '0'
             && equation[i] <= '9') continue;
+        // But if it's an EOL, break the loop
+        if(equation[i] == '\0') break;
+
         // If it's possibly an operator, iterate through all
         // of them, checking which precedence level it has
         int j, k, l = false;
@@ -92,6 +145,9 @@ int get_last_operation(char equation[]) {
 
 // Split a node if it has unsolved math
 void split_node(node *n) {
+    // Try to normalize the precedence, based
+    // on parentheses
+    normalize_precedence_offset(n->equation);
     // Check if there is still unsolved math
     int operation = get_last_operation(n->equation);
     // If there is...
@@ -140,8 +196,7 @@ void solve_node(node *n) {
             case '+':
                 sprintf(n->equation, "%i",
                 atoi(n->left->equation) 
-                    + atoi(n->right->equation));
-                    
+                    + atoi(n->right->equation));     
             break;
             // Detects subtraction
             case '-':

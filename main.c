@@ -6,5 +6,5 @@
 #include <stdio.h>
 
 int main(void) {
-    solve("2+2*2");
+    solve("(2+2)*2");
 }
