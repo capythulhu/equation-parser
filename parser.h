@@ -26,14 +26,13 @@
 // Operators ordered by their precedence level
 char operators[][2] = {{'*', '/'}, {'+', '-'}};
 
-// Check if the base precedence level of the
-// equation is one (if it begins and ends with)
-// parentheses
+// Check if the whole equation is inside a
+// pair of brackets and remove them
 bool normalize_precedence_offset(char equation[]) {
     // Get the size of the equation
     const unsigned int size = strlen(equation);
     int i = 0;
-    // And jump the whitespaces
+    // And skip the whitespaces
     while(equation[i] == ' ') i++;
     // If it finds a parentheses before
     // any other character...
@@ -43,7 +42,7 @@ bool normalize_precedence_offset(char equation[]) {
         // this time backwards
         int j = i;
         i = size - 1;
-        // Jumps the whitespaces
+        // Skip the whitespaces
         while(equation[i] == ' ') i--;
         // And if it finds a closing parentheses
         // as the last character...
@@ -98,7 +97,7 @@ int get_last_operation(const char equation[]) {
         if(p != 0) continue;
         // ...or if the char is a whitespace...
         if(equation[i] == ' ') continue;
-        // ...or a number, jump to next iteration
+        // ...or a number, skip to the next iteration
         if(equation[i] >= '0'
             && equation[i] <= '9') continue;
         // But if it's an EOL, break the loop
@@ -109,7 +108,7 @@ int get_last_operation(const char equation[]) {
         int j, k, l = false;
         for(j = 0; j < size && !l; j++) {
             // If that operator has been seen previously,
-            // jump to the next iteration
+            // skip to the next iteration
             if(positions[j] >= 0) continue;
             // Loop through all the operators in that
             // precedence level
@@ -189,28 +188,28 @@ void split_node(node *n) {
 void solve_node(node *n) {
     // If the node has both children, solve it
     if(n->left && n->right) {
-        // Switches on the operation and properly
+        // Switch on the operation and properly
         // calculate the operation
         switch(n->equation[0]) {
-            // Detects addition
+            // Detect addition
             case '+':
                 sprintf(n->equation, "%i",
                 atoi(n->left->equation) 
                     + atoi(n->right->equation));     
             break;
-            // Detects subtraction
+            // Detect subtraction
             case '-':
                 sprintf(n->equation, "%i",
                 atoi(n->left->equation) 
                     - atoi(n->right->equation));
             break;
-            // Detects multiplication
+            // Detect multiplication
             case '*':
                 sprintf(n->equation, "%i",
                 atoi(n->left->equation) 
                     * atoi(n->right->equation));
             break;
-            // Detects division
+            // Detect division
             case '/':
                 sprintf(n->equation, "%i",
                 atoi(n->left->equation) 
