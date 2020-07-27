@@ -34,7 +34,7 @@ bool normalize_precedence_offset(char equation[]) {
     const unsigned int size = strlen(equation);
     int i = 0;
     // And jump the whitespaces
-    while(equation[i] != ' ') i++;
+    while(equation[i] == ' ') i++;
     // If it finds a parentheses before
     // any other character...
     if(equation[i] == '(') {
@@ -44,7 +44,7 @@ bool normalize_precedence_offset(char equation[]) {
         int j = i;
         i = size - 1;
         // Jumps the whitespaces
-        while(equation[i] != ' ') i--;
+        while(equation[i] == ' ') i--;
         // And if it finds a closing parentheses
         // as the last character...
         if(equation[i] == ')') {
@@ -95,7 +95,7 @@ int get_last_operation(const char equation[]) {
             continue;
         }
         // If there is any precedence offset...
-        if(p > 0) continue;
+        if(p != 0) continue;
         // ...or if the char is a whitespace...
         if(equation[i] == ' ') continue;
         // ...or a number, jump to next iteration
@@ -147,7 +147,7 @@ int get_last_operation(const char equation[]) {
 void split_node(node *n) {
     // Try to normalize the precedence, based
     // on parentheses
-    normalize_precedence_offset(n->equation);
+    bool a = normalize_precedence_offset(n->equation);
     // Check if there is still unsolved math
     int operation = get_last_operation(n->equation);
     // If there is...
@@ -220,6 +220,11 @@ void solve_node(node *n) {
         // Clear the children of the current node
         clear_children(n);
     }
+}
+
+// Print a node
+void print_node(node *n) {
+    printf("%s\n", n->equation);
 }
 
 // Solve the equation

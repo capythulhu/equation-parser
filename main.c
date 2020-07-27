@@ -5,6 +5,6 @@
 
 #include <stdio.h>
 
-int main(void) {
-    solve("(2+2)*2");
+int main(int argc, char **argv) {
+    solve(argv[1]);
 }
