@@ -146,7 +146,7 @@ int get_last_operation(const char equation[]) {
 void split_node(node *n) {
     // Try to normalize the precedence, based
     // on parentheses
-    bool a = normalize_precedence_offset(n->equation);
+    while(normalize_precedence_offset(n->equation));
     // Check if there is still unsolved math
     int operation = get_last_operation(n->equation);
     // If there is...
